@@ -1,11 +1,11 @@
 """PlayStation Network integration — CAN API control via PSN cloud."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
 from .coordinator import PSNCoordinator
 
 PLATFORMS = [Platform.MEDIA_PLAYER]

@@ -5,9 +5,9 @@ Reverse engineered from PlayStation App 26.2.0 (index.android.bundle).
 Base URL: https://m.np.playstation.com/api/cloudAssistedNavigation
 Auth: PSN OAuth2 Bearer token
 """
+
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Any
 
@@ -47,7 +47,7 @@ class CANClient:
         self._session = session
         self._owns_session = session is None
 
-    async def __aenter__(self) -> "CANClient":
+    async def __aenter__(self) -> CANClient:
         if self._owns_session:
             self._session = aiohttp.ClientSession()
         return self
@@ -71,9 +71,7 @@ class CANClient:
         if self._session is None:
             raise RuntimeError("CANClient not initialised. Use as async context manager.")
         url = f"{_BASE_URL}{path}"
-        async with self._session.request(
-            method, url, headers=self._headers(), **kwargs
-        ) as resp:
+        async with self._session.request(method, url, headers=self._headers(), **kwargs) as resp:
             if resp.status >= 400:
                 text = await resp.text()
                 raise CANError(f"CAN API {method} {path} failed [{resp.status}]: {text}")

@@ -1,4 +1,5 @@
 """Diagnostics for the PlayStation 5 integration."""
+
 from __future__ import annotations
 
 from typing import Any

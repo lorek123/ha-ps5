@@ -61,7 +61,7 @@ class DDPStatus:
     raw: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def unavailable(cls, host: str) -> "DDPStatus":
+    def unavailable(cls, host: str) -> DDPStatus:
         """Return a status object representing a console that did not respond."""
         return cls(host=host, available=False)
 
@@ -101,11 +101,14 @@ def build_wakeup_packet(credential: str) -> bytes:
 
     :param credential: The user credential string obtained during console registration.
     """
-    return _build_packet("WAKEUP", {
-        "client-type": "a",
-        "auth-type": "C",
-        "user-credential": credential,
-    })
+    return _build_packet(
+        "WAKEUP",
+        {
+            "client-type": "a",
+            "auth-type": "C",
+            "user-credential": credential,
+        },
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -187,7 +190,10 @@ class _DDPProtocol(asyncio.DatagramProtocol):
             self.received.set()
             _LOGGER.debug(
                 "DDP response from %s: on=%s standby=%s title_id=%s",
-                host, status.on, status.standby, status.title_id,
+                host,
+                status.on,
+                status.standby,
+                status.title_id,
             )
 
     def error_received(self, exc: Exception) -> None:
@@ -214,7 +220,7 @@ async def _create_protocol(src_port: int = 0) -> tuple[asyncio.DatagramTransport
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if hasattr(socket, "SO_REUSEPORT"):
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
-    sock.bind(("0.0.0.0", src_port))
+    sock.bind(("0.0.0.0", src_port))  # noqa: S104
 
     loop = asyncio.get_running_loop()
     transport, protocol = await loop.create_datagram_endpoint(

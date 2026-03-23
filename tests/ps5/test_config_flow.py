@@ -1,22 +1,20 @@
 """Tests for PS5 config flow."""
+
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
-import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.ps5.const import CONF_CREDENTIAL, DOMAIN
 from custom_components.ps5.regist import RegistrationError
 
-from .conftest import CREDENTIAL, FAKE_JWT, HOST, HOST_ID, HOST_NAME, make_status
+from .conftest import CREDENTIAL, FAKE_JWT, HOST, make_status
 
 
 async def test_user_step_shows_form(hass: HomeAssistant) -> None:
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": "user"}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
 
@@ -66,9 +64,7 @@ async def test_autodiscover_one_found(hass: HomeAssistant) -> None:
 
 async def test_autodiscover_multiple(hass: HomeAssistant) -> None:
     devices = [make_status(), make_status()]
-    with patch(
-        "custom_components.ps5.config_flow.async_discover", return_value=devices
-    ):
+    with patch("custom_components.ps5.config_flow.async_discover", return_value=devices):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": ""}
         )
@@ -76,9 +72,7 @@ async def test_autodiscover_multiple(hass: HomeAssistant) -> None:
 
 
 async def test_pin_invalid_format(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
@@ -89,18 +83,19 @@ async def test_pin_invalid_format(hass: HomeAssistant) -> None:
 
 
 async def test_pin_empty_account_id(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
-    with patch(
-        "custom_components.ps5.config_flow.PSNAuth.from_npsso",
-        return_value={"access_token": FAKE_JWT},
-    ), patch(
-        "custom_components.ps5.config_flow.account_id_from_access_token",
-        return_value="",  # empty → raises ValueError in _get_account_id
+    with (
+        patch(
+            "custom_components.ps5.config_flow.PSNAuth.from_npsso",
+            return_value={"access_token": FAKE_JWT},
+        ),
+        patch(
+            "custom_components.ps5.config_flow.account_id_from_access_token",
+            return_value="",  # empty → raises ValueError in _get_account_id
+        ),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"pin": "12345678", "npsso": "token"}
@@ -109,9 +104,7 @@ async def test_pin_empty_account_id(hass: HomeAssistant) -> None:
 
 
 async def test_pin_invalid_npsso(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
@@ -126,21 +119,23 @@ async def test_pin_invalid_npsso(hass: HomeAssistant) -> None:
 
 
 async def test_pin_registration_failed(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
-    with patch(
-        "custom_components.ps5.config_flow.PSNAuth.from_npsso",
-        return_value={"access_token": FAKE_JWT},
-    ), patch(
-        "custom_components.ps5.config_flow.account_id_from_access_token",
-        return_value="123",
-    ), patch(
-        "custom_components.ps5.config_flow.async_register",
-        side_effect=RegistrationError("failed"),
+    with (
+        patch(
+            "custom_components.ps5.config_flow.PSNAuth.from_npsso",
+            return_value={"access_token": FAKE_JWT},
+        ),
+        patch(
+            "custom_components.ps5.config_flow.account_id_from_access_token",
+            return_value="123",
+        ),
+        patch(
+            "custom_components.ps5.config_flow.async_register",
+            side_effect=RegistrationError("failed"),
+        ),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"pin": "12345678", "npsso": "token"}
@@ -149,22 +144,21 @@ async def test_pin_registration_failed(hass: HomeAssistant) -> None:
 
 
 async def test_full_flow_success(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
-    with patch(
-        "custom_components.ps5.config_flow.PSNAuth.from_npsso",
-        return_value={"access_token": FAKE_JWT},
-    ), patch(
-        "custom_components.ps5.config_flow.account_id_from_access_token",
-        return_value="123",
-    ), patch(
-        "custom_components.ps5.config_flow.async_register", return_value=CREDENTIAL
-    ), patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
+    with (
+        patch(
+            "custom_components.ps5.config_flow.PSNAuth.from_npsso",
+            return_value={"access_token": FAKE_JWT},
+        ),
+        patch(
+            "custom_components.ps5.config_flow.account_id_from_access_token",
+            return_value="123",
+        ),
+        patch("custom_components.ps5.config_flow.async_register", return_value=CREDENTIAL),
+        patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"pin": "12345678", "npsso": "token"}
@@ -175,22 +169,21 @@ async def test_full_flow_success(hass: HomeAssistant) -> None:
 
 async def test_already_configured(hass: HomeAssistant, config_entry) -> None:
     config_entry.add_to_hass(hass)
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
-    with patch(
-        "custom_components.ps5.config_flow.PSNAuth.from_npsso",
-        return_value={"access_token": FAKE_JWT},
-    ), patch(
-        "custom_components.ps5.config_flow.account_id_from_access_token",
-        return_value="123",
-    ), patch(
-        "custom_components.ps5.config_flow.async_register", return_value=CREDENTIAL
-    ), patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
+    with (
+        patch(
+            "custom_components.ps5.config_flow.PSNAuth.from_npsso",
+            return_value={"access_token": FAKE_JWT},
+        ),
+        patch(
+            "custom_components.ps5.config_flow.account_id_from_access_token",
+            return_value="123",
+        ),
+        patch("custom_components.ps5.config_flow.async_register", return_value=CREDENTIAL),
+        patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"pin": "12345678", "npsso": "token"}
@@ -200,21 +193,23 @@ async def test_already_configured(hass: HomeAssistant, config_entry) -> None:
 
 
 async def test_pin_unknown_error(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.ps5.config_flow.async_get_status", return_value=make_status()
-    ):
+    with patch("custom_components.ps5.config_flow.async_get_status", return_value=make_status()):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": HOST}
         )
-    with patch(
-        "custom_components.ps5.config_flow.PSNAuth.from_npsso",
-        return_value={"access_token": FAKE_JWT},
-    ), patch(
-        "custom_components.ps5.config_flow.account_id_from_access_token",
-        return_value="123",
-    ), patch(
-        "custom_components.ps5.config_flow.async_register",
-        side_effect=RuntimeError("unexpected"),
+    with (
+        patch(
+            "custom_components.ps5.config_flow.PSNAuth.from_npsso",
+            return_value={"access_token": FAKE_JWT},
+        ),
+        patch(
+            "custom_components.ps5.config_flow.account_id_from_access_token",
+            return_value="123",
+        ),
+        patch(
+            "custom_components.ps5.config_flow.async_register",
+            side_effect=RuntimeError("unexpected"),
+        ),
     ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], {"pin": "12345678", "npsso": "token"}
@@ -224,16 +219,12 @@ async def test_pin_unknown_error(hass: HomeAssistant) -> None:
 
 async def test_pick_device_submit(hass: HomeAssistant) -> None:
     devices = [make_status(), make_status()]
-    with patch(
-        "custom_components.ps5.config_flow.async_discover", return_value=devices
-    ):
+    with patch("custom_components.ps5.config_flow.async_discover", return_value=devices):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"host": ""}
         )
     assert result["step_id"] == "pick_device"
-    result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"host": HOST}
-    )
+    result = await hass.config_entries.flow.async_configure(result["flow_id"], {"host": HOST})
     assert result["step_id"] == "pin"
 
 

@@ -1,4 +1,5 @@
 """Shared fixtures for PSN tests."""
+
 from __future__ import annotations
 
 import time
@@ -20,9 +21,10 @@ ACCOUNT_ID = "1234567890"
 ACCESS_TOKEN = (
     "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9"
     "."
-    + __import__("base64").urlsafe_b64encode(
-        __import__("json").dumps({"account_id": ACCOUNT_ID}).encode()
-    ).rstrip(b"=").decode()
+    + __import__("base64")
+    .urlsafe_b64encode(__import__("json").dumps({"account_id": ACCOUNT_ID}).encode())
+    .rstrip(b"=")
+    .decode()
     + ".fakesig"
 )
 REFRESH_TOKEN = "refresh_abc123"
@@ -65,9 +67,11 @@ def config_entry():
 def mock_can_client():
     """AsyncMock CANClient that returns one online PS5."""
     client = AsyncMock()
-    client.get_clients = AsyncMock(return_value=[
-        {"duid": DUID_1, "name": "My PS5", "platform": "PS5", "status": "online"},
-    ])
+    client.get_clients = AsyncMock(
+        return_value=[
+            {"duid": DUID_1, "name": "My PS5", "platform": "PS5", "status": "online"},
+        ]
+    )
     client.__aenter__ = AsyncMock(return_value=client)
     client.__aexit__ = AsyncMock(return_value=False)
     return client

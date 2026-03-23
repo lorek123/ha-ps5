@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from psn_ddp.const import (
     DDP_VERSION,
     FIELD_HOST_ID,
@@ -21,7 +19,6 @@ from psn_ddp.protocol import (
     build_wakeup_packet,
     parse_response,
 )
-
 
 # ---------------------------------------------------------------------------
 # Packet builders
@@ -63,14 +60,17 @@ def _make_response(status_code: int, fields: dict[str, str] | None = None) -> by
 
 
 def test_parse_console_on():
-    data = _make_response(STATUS_OK, {
-        FIELD_HOST_TYPE: "PS5",
-        FIELD_HOST_NAME: "Living Room PS5",
-        FIELD_HOST_ID: "AABBCCDDEEFF",
-        FIELD_TITLE_ID: "PPSA01284_00",
-        FIELD_TITLE_NAME: "Marvel's Spider-Man 2",
-        FIELD_SYSTEM_VERSION: "09000000",
-    })
+    data = _make_response(
+        STATUS_OK,
+        {
+            FIELD_HOST_TYPE: "PS5",
+            FIELD_HOST_NAME: "Living Room PS5",
+            FIELD_HOST_ID: "AABBCCDDEEFF",
+            FIELD_TITLE_ID: "PPSA01284_00",
+            FIELD_TITLE_NAME: "Marvel's Spider-Man 2",
+            FIELD_SYSTEM_VERSION: "09000000",
+        },
+    )
     status = parse_response(data, "192.168.1.50")
 
     assert status.available is True
@@ -86,11 +86,14 @@ def test_parse_console_on():
 
 
 def test_parse_console_standby():
-    data = _make_response(STATUS_STANDBY, {
-        FIELD_HOST_TYPE: "PS5",
-        FIELD_HOST_NAME: "My PS5",
-        FIELD_HOST_ID: "112233445566",
-    })
+    data = _make_response(
+        STATUS_STANDBY,
+        {
+            FIELD_HOST_TYPE: "PS5",
+            FIELD_HOST_NAME: "My PS5",
+            FIELD_HOST_ID: "112233445566",
+        },
+    )
     status = parse_response(data, "192.168.1.51")
 
     assert status.available is True
@@ -101,13 +104,16 @@ def test_parse_console_standby():
 
 
 def test_parse_ps4_response():
-    data = _make_response(STATUS_OK, {
-        FIELD_HOST_TYPE: "PS4",
-        FIELD_HOST_NAME: "My PS4",
-        FIELD_HOST_ID: "DEADBEEF1234",
-        FIELD_TITLE_ID: "CUSA07408_00",
-        FIELD_TITLE_NAME: "God of War",
-    })
+    data = _make_response(
+        STATUS_OK,
+        {
+            FIELD_HOST_TYPE: "PS4",
+            FIELD_HOST_NAME: "My PS4",
+            FIELD_HOST_ID: "DEADBEEF1234",
+            FIELD_TITLE_ID: "CUSA07408_00",
+            FIELD_TITLE_NAME: "God of War",
+        },
+    )
     status = parse_response(data, "192.168.1.52")
 
     assert status.host_type == "PS4"
@@ -115,10 +121,13 @@ def test_parse_ps4_response():
 
 
 def test_parse_empty_title_id_returns_none():
-    data = _make_response(STATUS_OK, {
-        FIELD_HOST_TYPE: "PS5",
-        FIELD_TITLE_ID: "",
-    })
+    data = _make_response(
+        STATUS_OK,
+        {
+            FIELD_HOST_TYPE: "PS5",
+            FIELD_TITLE_ID: "",
+        },
+    )
     status = parse_response(data, "192.168.1.50")
     assert status.title_id is None
 
@@ -153,11 +162,14 @@ def test_unavailable_factory():
 
 
 def test_ddp_status_raw_contains_all_fields():
-    data = _make_response(STATUS_OK, {
-        FIELD_HOST_TYPE: "PS5",
-        FIELD_HOST_NAME: "Test",
-        FIELD_SYSTEM_VERSION: "09000000",
-    })
+    data = _make_response(
+        STATUS_OK,
+        {
+            FIELD_HOST_TYPE: "PS5",
+            FIELD_HOST_NAME: "Test",
+            FIELD_SYSTEM_VERSION: "09000000",
+        },
+    )
     status = parse_response(data, "1.2.3.4")
     assert status.raw[FIELD_HOST_TYPE] == "PS5"
     assert status.raw[FIELD_SYSTEM_VERSION] == "09000000"

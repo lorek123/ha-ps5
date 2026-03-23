@@ -1,17 +1,16 @@
 """Config flow for PlayStation 5 integration."""
+
 from __future__ import annotations
 
 import logging
 from typing import Any
 
 import voluptuous as vol
-from pyps5.auth import PSNAuth, account_id_from_access_token
-
-from psn_ddp import DDPStatus, async_discover, async_get_status
-
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_HOST
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from psn_ddp import DDPStatus, async_discover, async_get_status
+from pyps5.auth import PSNAuth, account_id_from_access_token
 
 from .const import CONF_CREDENTIAL, DOMAIN
 from .regist import RegistrationError, async_register
@@ -35,9 +34,7 @@ class PS5ConfigFlow(ConfigFlow, domain=DOMAIN):
         self._host: str | None = None
         self._discovered: list[DDPStatus] = []
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Step 1: discover PS5 on the network or enter IP manually."""
         errors: dict[str, str] = {}
 
@@ -64,9 +61,7 @@ class PS5ConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {vol.Optional("host"): str}
-            ),
+            data_schema=vol.Schema({vol.Optional("host"): str}),
             description_placeholders={
                 "discover_hint": "Leave blank to auto-discover on your network."
             },
@@ -81,18 +76,13 @@ class PS5ConfigFlow(ConfigFlow, domain=DOMAIN):
             self._host = user_input["host"]
             return await self.async_step_pin()
 
-        options = {
-            d.host: f"{d.host_name or 'PS5'} ({d.host})"
-            for d in self._discovered
-        }
+        options = {d.host: f"{d.host_name or 'PS5'} ({d.host})" for d in self._discovered}
         return self.async_show_form(
             step_id="pick_device",
             data_schema=vol.Schema({vol.Required("host"): vol.In(options)}),
         )
 
-    async def async_step_pin(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_pin(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Step 2: enter PIN + npsso, run registration."""
         errors: dict[str, str] = {}
 
@@ -106,9 +96,7 @@ class PS5ConfigFlow(ConfigFlow, domain=DOMAIN):
                 assert self._host is not None
                 try:
                     account_id = await self._get_account_id(npsso)
-                    credential = await async_register(
-                        self._host, int(pin_str), account_id
-                    )
+                    credential = await async_register(self._host, int(pin_str), account_id)
                 except ValueError as exc:
                     _LOGGER.error("PSN NPSSO exchange failed: %s", exc)
                     errors["npsso"] = "invalid_npsso"

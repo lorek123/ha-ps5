@@ -1,17 +1,17 @@
 """PS5 coordinator — polls DDP status on a fixed interval."""
+
 from __future__ import annotations
 
 import logging
 from datetime import timedelta
 
-from psn_ddp import DDPStatus, async_get_status
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from psn_ddp import DDPStatus, async_get_status
 
-from .const import DOMAIN, POLL_INTERVAL
+from .const import POLL_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 

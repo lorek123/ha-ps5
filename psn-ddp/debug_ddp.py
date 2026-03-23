@@ -1,4 +1,5 @@
 """Minimal DDP debug script — shows exactly what port we bind, what we send, and what we receive."""
+
 from __future__ import annotations
 
 import asyncio
@@ -12,7 +13,9 @@ BROADCAST = "255.255.255.255"
 SRCH_PACKET = b"SRCH * HTTP/1.1\ndevice-discovery-protocol-version:00030010\n\n"
 
 
-async def debug_discover(target: str = BROADCAST, src_port: int = DDP_SRCH_PORT, timeout: float = 3.0) -> None:
+async def debug_discover(
+    target: str = BROADCAST, src_port: int = DDP_SRCH_PORT, timeout: float = 3.0
+) -> None:
     loop = asyncio.get_event_loop()
 
     received: list[tuple[bytes, tuple]] = []

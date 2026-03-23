@@ -20,6 +20,7 @@ dev = [
     "pyps5",
     "cryptography>=41.0",
     "mypy>=1.19.1",
+    "ruff>=0.15.7",
 ]
 
 [tool.pytest.ini_options]
@@ -29,6 +30,34 @@ testpaths = ["tests"]
 [tool.coverage.run]
 source = ["custom_components/ps5", "custom_components/psn"]
 omit = ["tests/*"]
+
+[tool.ruff]
+target-version = "py314"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "UP",       # pyupgrade
+    "B",        # flake8-bugbear
+    "S",        # flake8-bandit (security)
+    "RUF",      # ruff-specific
+]
+ignore = [
+    "S101",     # assert statements (used in tests and type narrowing)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S", "B"]  # security/bugbear rules too strict for test helpers
+# Standalone debug/example scripts — not production code
+"psn-ddp/debug_ddp.py" = ["S", "E501"]
+"psn-ddp/get_credential.py" = ["S", "E501"]
+"psn-ddp/get_credential_pin.py" = ["S", "E501"]
+"psn-ddp/get_ddp_credential.py" = ["S", "E501"]
+"psn-ddp/regist_ps5.py" = ["S", "E501", "RUF"]
+"psn-ddp/tests/**" = ["S", "E501"]
 
 [tool.mypy]
 python_version = "3.14"

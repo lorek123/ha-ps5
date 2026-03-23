@@ -3,12 +3,12 @@
 DDP runs over UDP port 9302 (console) / 987 (client send port).
 Reverse engineered from ps4-waker and pyps4-2ndscreen.
 """
+
 from __future__ import annotations
 
 import asyncio
 import logging
 import socket
-import time
 from typing import Any
 
 _LOGGER = logging.getLogger(__name__)
@@ -96,7 +96,7 @@ async def async_send_ddp_message(
     loop = asyncio.get_event_loop()
     transport, protocol = await loop.create_datagram_endpoint(
         DDPProtocol,
-        local_addr=("0.0.0.0", 0),
+        local_addr=("0.0.0.0", 0),  # noqa: S104
         family=socket.AF_INET,
     )
     try:
@@ -131,7 +131,7 @@ async def async_discover(
     loop = asyncio.get_event_loop()
     transport, protocol = await loop.create_datagram_endpoint(
         DDPProtocol,
-        local_addr=("0.0.0.0", 0),
+        local_addr=("0.0.0.0", 0),  # noqa: S104
         family=socket.AF_INET,
     )
     try:
@@ -140,6 +140,4 @@ async def async_discover(
         await asyncio.sleep(timeout)
     finally:
         transport.close()
-    return [
-        {"host": host, **info} for host, info in protocol.responses.items()
-    ]
+    return [{"host": host, **info} for host, info in protocol.responses.items()]

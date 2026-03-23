@@ -1,9 +1,10 @@
 """Constants for the PlayStation Network integration."""
+
 DOMAIN = "psn"
 
 CONF_NPSSO = "npsso"
-CONF_ACCESS_TOKEN = "access_token"
-CONF_REFRESH_TOKEN = "refresh_token"
+CONF_ACCESS_TOKEN = "access_token"  # noqa: S105
+CONF_REFRESH_TOKEN = "refresh_token"  # noqa: S105
 CONF_EXPIRES_AT = "expires_at"
 CONF_ACCOUNT_ID = "account_id"
 

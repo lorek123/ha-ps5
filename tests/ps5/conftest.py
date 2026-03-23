@@ -1,11 +1,10 @@
 """Shared fixtures for PS5 tests."""
+
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 from psn_ddp.protocol import DDPStatus
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.ps5.const import CONF_CREDENTIAL, DOMAIN
 
@@ -16,9 +15,10 @@ HOST_NAME = "My PS5"
 FAKE_JWT = (
     "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9"
     "."
-    + __import__("base64").urlsafe_b64encode(
-        __import__("json").dumps({"account_id": "123456789"}).encode()
-    ).rstrip(b"=").decode()
+    + __import__("base64")
+    .urlsafe_b64encode(__import__("json").dumps({"account_id": "123456789"}).encode())
+    .rstrip(b"=")
+    .decode()
     + ".fakesig"
 )
 

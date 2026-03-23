@@ -1,11 +1,11 @@
 """PlayStation 5 integration — local DDP control."""
+
 from __future__ import annotations
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import DOMAIN
 from .coordinator import PS5Coordinator
 
 PLATFORMS = [Platform.MEDIA_PLAYER]

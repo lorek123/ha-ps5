@@ -1,14 +1,14 @@
 """Main Ps5Async class — top-level API for PS5 control."""
+
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Any
 
 import aiohttp
 
 from .auth import TokenManager
-from .can import CANClient, PLATFORM_PS5
+from .can import PLATFORM_PS5, CANClient
 from .ddp import (
     STATUS_ON,
     STATUS_STANDBY,

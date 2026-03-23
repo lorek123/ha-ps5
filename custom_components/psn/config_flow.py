@@ -1,4 +1,5 @@
 """Config flow for PlayStation Network integration."""
+
 from __future__ import annotations
 
 import logging
@@ -6,9 +7,9 @@ from typing import Any
 
 import aiohttp
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from pyps5.auth import PSNAuth, account_id_from_access_token
 
 from .const import (
     CONF_ACCESS_TOKEN,
@@ -18,13 +19,10 @@ from .const import (
     CONF_REFRESH_TOKEN,
     DOMAIN,
 )
-from pyps5.auth import PSNAuth, account_id_from_access_token
 
 _LOGGER = logging.getLogger(__name__)
 
-STEP_USER_SCHEMA = vol.Schema(
-    {vol.Required(CONF_NPSSO): str}
-)
+STEP_USER_SCHEMA = vol.Schema({vol.Required(CONF_NPSSO): str})
 
 
 class PSNConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -32,9 +30,7 @@ class PSNConfigFlow(ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Single step: enter NPSSO token."""
         errors: dict[str, str] = {}
 
@@ -81,9 +77,7 @@ class PSNConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_reauth(
-        self, entry_data: dict[str, Any]
-    ) -> ConfigFlowResult:
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
         """Trigger reauthentication when PSN tokens expire."""
         return await self.async_step_reauth_confirm()
 
@@ -170,5 +164,3 @@ class PSNConfigFlow(ConfigFlow, domain=DOMAIN):
             },
             errors=errors,
         )
-
-

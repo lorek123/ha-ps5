@@ -13,16 +13,16 @@ jobs:
       id-token: write  # OIDC trusted publishing
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Build
         working-directory: psn-ddp
         run: uv build
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@v1.13.0
         with:
           packages-dir: psn-ddp/dist/

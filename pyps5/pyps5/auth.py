@@ -3,16 +3,17 @@
 Uses the PlayStation App's PKCE OAuth flow to obtain access tokens.
 Reverse engineered from PS App and documented by the community (psnawp, ps5-mqtt).
 """
+
 from __future__ import annotations
 
 import base64
 import hashlib
+import json
 import logging
 import os
 import re
 import time
 from typing import Any
-import json
 from urllib.parse import urlencode
 
 import aiohttp
@@ -22,12 +23,13 @@ _LOGGER = logging.getLogger(__name__)
 # PlayStation App OAuth2 client credentials
 # These are baked into the official PS App APK
 _CLIENT_ID = "09515159-7237-4370-9b40-3806e67c0891"
-_CLIENT_SECRET = "ucPjka5tntB2KqsP"
+_CLIENT_SECRET = "ucPjka5tntB2KqsP"  # noqa: S105 — public credential baked into PS App APK
 _REDIRECT_URI = "com.scee.psxandroid.scecompcall://redirect"
 _SCOPE = "psn:mobile.v2.core psn:clientapp"
 
 _AUTH_BASE = "https://ca.account.sony.com/api/authz/v3"
-_TOKEN_URL = "https://ca.account.sony.com/api/authz/v3/oauth/token"
+_TOKEN_URL = "https://ca.account.sony.com/api/authz/v3/oauth/token"  # noqa: S105
+
 
 def account_id_from_access_token(access_token: str) -> str | None:
     """Extract account_id from a PSN JWT access token.
@@ -39,7 +41,9 @@ def account_id_from_access_token(access_token: str) -> str | None:
         payload_b64 = access_token.split(".")[1]
         payload_b64 += "=" * (-len(payload_b64) % 4)
         claims = json.loads(base64.urlsafe_b64decode(payload_b64))
-        return str(claims["account_id"]) if "account_id" in claims else str(claims.get("sub", "")) or None
+        if "account_id" in claims:
+            return str(claims["account_id"])
+        return str(claims.get("sub", "")) or None
     except Exception:
         return None
 
@@ -56,14 +60,14 @@ def _code_challenge(verifier: str) -> str:
 class PSNAuth:
     """PSN OAuth2 flow using PKCE.
 
-    Usage (interactive – for config flow):
+    Usage (interactive - for config flow):
         auth = PSNAuth(session)
         url = await auth.get_login_url()
         # Direct user to url, they log in, get redirected to callback
         # Extract the ?code= param from the redirect URI
         tokens = await auth.exchange_code(code)
 
-    Usage (npsso token – easier for HA):
+    Usage (npsso token - easier for HA):
         tokens = await PSNAuth.from_npsso(session, npsso_token)
     """
 
@@ -125,9 +129,7 @@ class PSNAuth:
             return result
 
     @classmethod
-    async def from_npsso(
-        cls, session: aiohttp.ClientSession, npsso: str
-    ) -> dict[str, Any]:
+    async def from_npsso(cls, session: aiohttp.ClientSession, npsso: str) -> dict[str, Any]:
         """Obtain tokens from an NPSSO cookie (simplest method for end users).
 
         Users can get their NPSSO from: https://ca.account.sony.com/api/v1/ssocookie
@@ -178,7 +180,7 @@ class TokenManager:
     @classmethod
     def from_token_response(
         cls, tokens: dict[str, Any], session: aiohttp.ClientSession
-    ) -> "TokenManager":
+    ) -> TokenManager:
         return cls(
             access_token=tokens["access_token"],
             refresh_token=tokens["refresh_token"],

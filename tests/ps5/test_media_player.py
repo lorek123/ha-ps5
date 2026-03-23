@@ -1,7 +1,8 @@
 """Tests for PS5 media player entity."""
+
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 from homeassistant.components.media_player import MediaPlayerState
 from homeassistant.core import HomeAssistant
@@ -51,6 +52,7 @@ async def test_media_content_id(hass: HomeAssistant, config_entry) -> None:
 async def test_unique_id(hass: HomeAssistant, config_entry) -> None:
     await _setup(hass, config_entry)
     from homeassistant.helpers import entity_registry as er
+
     ent_reg = er.async_get(hass)
     entry = ent_reg.async_get(ENTITY_ID)
     assert entry is not None
@@ -60,6 +62,7 @@ async def test_unique_id(hass: HomeAssistant, config_entry) -> None:
 async def test_device_info(hass: HomeAssistant, config_entry) -> None:
     await _setup(hass, config_entry)
     from homeassistant.helpers import device_registry as dr
+
     dev_reg = dr.async_get(hass)
     device = dev_reg.async_get_device({("ps5", HOST_ID)})
     assert device is not None
@@ -76,11 +79,12 @@ async def test_state_off_available_not_on_not_standby(hass: HomeAssistant, confi
 
 async def test_turn_on(hass: HomeAssistant, config_entry) -> None:
     await _setup(hass, config_entry, make_status(on=False, standby=True))
-    with patch(
-        "custom_components.ps5.media_player.async_wakeup"
-    ) as mock_wake, patch(
-        "custom_components.ps5.coordinator.async_get_status",
-        return_value=make_status(on=True),
+    with (
+        patch("custom_components.ps5.media_player.async_wakeup") as mock_wake,
+        patch(
+            "custom_components.ps5.coordinator.async_get_status",
+            return_value=make_status(on=True),
+        ),
     ):
         await hass.services.async_call(
             "media_player", "turn_on", {"entity_id": ENTITY_ID}, blocking=True

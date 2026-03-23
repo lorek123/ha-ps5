@@ -10,7 +10,6 @@ Steps
 from __future__ import annotations
 
 import base64
-import hashlib
 import json
 import os
 import re
@@ -38,15 +37,23 @@ def _make_verifier() -> str:
 
 def _get_access_token(npsso: str) -> str:
     verifier = _make_verifier()
-    params = urllib.parse.urlencode({
-        "access_type": "offline", "client_id": _CLIENT_ID,
-        "redirect_uri": _REDIRECT_URI, "response_type": "code", "scope": _SCOPE,
-    })
+    params = urllib.parse.urlencode(
+        {
+            "access_type": "offline",
+            "client_id": _CLIENT_ID,
+            "redirect_uri": _REDIRECT_URI,
+            "response_type": "code",
+            "scope": _SCOPE,
+        }
+    )
 
     class _NoRedirect(urllib.request.HTTPRedirectHandler):
-        def redirect_request(self, *a, **kw): return None
+        def redirect_request(self, *a, **kw):
+            return None
 
-    req = urllib.request.Request(f"{_AUTH_URL}?{params}", headers={"Cookie": f"npsso={npsso}", "User-Agent": _UA})
+    req = urllib.request.Request(
+        f"{_AUTH_URL}?{params}", headers={"Cookie": f"npsso={npsso}", "User-Agent": _UA}
+    )
     opener = urllib.request.build_opener(_NoRedirect)
     try:
         opener.open(req)
@@ -57,13 +64,25 @@ def _get_access_token(npsso: str) -> str:
             raise RuntimeError(f"npsso exchange failed: {location!r}") from e
         code = match.group(1)
 
-    body = urllib.parse.urlencode({
-        "code": code, "code_verifier": verifier, "grant_type": "authorization_code",
-        "redirect_uri": _REDIRECT_URI, "token_format": "jwt",
-    }).encode()
-    req2 = urllib.request.Request(_TOKEN_URL, data=body, headers={
-        "Authorization": _BASIC_AUTH, "Content-Type": "application/x-www-form-urlencoded", "User-Agent": _UA,
-    }, method="POST")
+    body = urllib.parse.urlencode(
+        {
+            "code": code,
+            "code_verifier": verifier,
+            "grant_type": "authorization_code",
+            "redirect_uri": _REDIRECT_URI,
+            "token_format": "jwt",
+        }
+    ).encode()
+    req2 = urllib.request.Request(
+        _TOKEN_URL,
+        data=body,
+        headers={
+            "Authorization": _BASIC_AUTH,
+            "Content-Type": "application/x-www-form-urlencoded",
+            "User-Agent": _UA,
+        },
+        method="POST",
+    )
     with urllib.request.urlopen(req2) as resp:
         return json.loads(resp.read())["access_token"]
 
@@ -74,8 +93,13 @@ def _did() -> str:
 
 def _try(host: str, pin: str, rp_version: str, extra_headers: dict[str, str]) -> bytes:
     headers = {
-        "RP-Version": rp_version, "RP-Type": "ctrl", "RP-Did": _did(),
-        "RP-AuthType": "C", "RP-Pin": pin, "Host": f"{host}:{TCP_PORT}", "Content-Length": "0",
+        "RP-Version": rp_version,
+        "RP-Type": "ctrl",
+        "RP-Did": _did(),
+        "RP-AuthType": "C",
+        "RP-Pin": pin,
+        "Host": f"{host}:{TCP_PORT}",
+        "Content-Length": "0",
     }
     headers.update(extra_headers)
     raw = "GET /sce/rp/regist HTTP/1.1\r\n"
@@ -117,12 +141,12 @@ def main() -> None:
         access_token = ""
 
     attempts = [
-        ("9.21, no auth",      "9.21", {}),
-        ("9.21, Bearer",       "9.21", {"Authorization": f"Bearer {access_token}"}),
-        ("9.21, RP-Auth",      "9.21", {"RP-Auth": access_token}),
-        ("9.0,  Bearer",       "9.0",  {"Authorization": f"Bearer {access_token}"}),
-        ("10.0, Bearer",       "10.0", {"Authorization": f"Bearer {access_token}"}),
-        ("8.0,  Bearer",       "8.0",  {"Authorization": f"Bearer {access_token}"}),
+        ("9.21, no auth", "9.21", {}),
+        ("9.21, Bearer", "9.21", {"Authorization": f"Bearer {access_token}"}),
+        ("9.21, RP-Auth", "9.21", {"RP-Auth": access_token}),
+        ("9.0,  Bearer", "9.0", {"Authorization": f"Bearer {access_token}"}),
+        ("10.0, Bearer", "10.0", {"Authorization": f"Bearer {access_token}"}),
+        ("8.0,  Bearer", "8.0", {"Authorization": f"Bearer {access_token}"}),
     ]
 
     for label, version, extras in attempts:

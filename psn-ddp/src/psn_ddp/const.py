@@ -19,8 +19,8 @@ MSG_TYPE_WAKEUP: str = "WAKEUP"
 MSG_TYPE_LAUNCH: str = "LAUNCH"
 
 # HTTP-style status codes in DDP responses
-STATUS_OK: int = 200        # console is on and running
-STATUS_STANDBY: int = 620   # console is in rest/standby mode
+STATUS_OK: int = 200  # console is on and running
+STATUS_STANDBY: int = 620  # console is in rest/standby mode
 
 # Human-readable status strings parsed from the response first line
 STATUS_STRING_OK: str = "Ok"

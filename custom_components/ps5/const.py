@@ -1,4 +1,5 @@
 """Constants for the PlayStation 5 integration."""
+
 DOMAIN = "ps5"
 
 CONF_CREDENTIAL = "credential"

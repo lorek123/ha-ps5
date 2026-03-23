@@ -1,11 +1,10 @@
 """Tests for PS5 coordinator."""
+
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
-import pytest
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from custom_components.ps5.coordinator import PS5Coordinator
 

@@ -1,9 +1,8 @@
 """PS5 media_player entity — DDP status + WAKEUP."""
+
 from __future__ import annotations
 
 import logging
-
-from psn_ddp import DDPStatus, async_wakeup
 
 from homeassistant.components.media_player import (
     MediaPlayerDeviceClass,
@@ -17,6 +16,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from psn_ddp import DDPStatus, async_wakeup
 
 from .const import CONF_CREDENTIAL, DOMAIN
 from .coordinator import PS5Coordinator

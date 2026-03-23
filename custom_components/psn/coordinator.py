@@ -1,4 +1,5 @@
 """PSN coordinator — polls CAN client list on a fixed interval."""
+
 from __future__ import annotations
 
 import logging
@@ -7,22 +8,19 @@ from dataclasses import dataclass, field
 from datetime import timedelta
 from typing import Any
 
-from pyps5.auth import PSNAuth
-from pyps5.can import CANClient, CANError, PLATFORM_PS5
-
-from .const import CLIENT_STATUS_ONLINE
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from pyps5.auth import PSNAuth
+from pyps5.can import PLATFORM_PS5, CANClient, CANError
 
 from .const import (
+    CLIENT_STATUS_ONLINE,
     CONF_ACCESS_TOKEN,
     CONF_EXPIRES_AT,
     CONF_REFRESH_TOKEN,
-    DOMAIN,
     POLL_INTERVAL,
 )
 
@@ -87,13 +85,20 @@ class PSNCoordinator(DataUpdateCoordinator[PSNData]):
 
             new_access = tokens["access_token"]
             new_refresh = tokens.get("refresh_token", entry.data[CONF_REFRESH_TOKEN])
-            if new_access != entry.data[CONF_ACCESS_TOKEN] or new_refresh != entry.data[CONF_REFRESH_TOKEN]:
-                self.hass.config_entries.async_update_entry(entry, data={
-                    **entry.data,
-                    CONF_ACCESS_TOKEN: new_access,
-                    CONF_REFRESH_TOKEN: new_refresh,
-                    CONF_EXPIRES_AT: tokens["expires_at"],
-                })
+            tokens_changed = (
+                new_access != entry.data[CONF_ACCESS_TOKEN]
+                or new_refresh != entry.data[CONF_REFRESH_TOKEN]
+            )
+            if tokens_changed:
+                self.hass.config_entries.async_update_entry(
+                    entry,
+                    data={
+                        **entry.data,
+                        CONF_ACCESS_TOKEN: new_access,
+                        CONF_REFRESH_TOKEN: new_refresh,
+                        CONF_EXPIRES_AT: tokens["expires_at"],
+                    },
+                )
             access_token = new_access
 
         try:

@@ -1,15 +1,14 @@
 """Tests for PSN coordinator."""
+
 from __future__ import annotations
 
 import time
 from unittest.mock import AsyncMock, patch
 
-import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers.update_coordinator import UpdateFailed
-from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pyps5.can import CANError
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.psn.const import (
     CONF_ACCESS_TOKEN,
@@ -19,12 +18,10 @@ from custom_components.psn.const import (
 )
 from custom_components.psn.coordinator import PSNCoordinator
 
-from .conftest import ACCOUNT_ID, ACCESS_TOKEN, DUID_1, FAKE_TOKENS, REFRESH_TOKEN
+from .conftest import ACCESS_TOKEN, ACCOUNT_ID, DUID_1, FAKE_TOKENS, REFRESH_TOKEN
 
 
-async def test_update_returns_clients(
-    hass: HomeAssistant, config_entry, mock_can_client
-) -> None:
+async def test_update_returns_clients(hass: HomeAssistant, config_entry, mock_can_client) -> None:
     config_entry.add_to_hass(hass)
     coordinator = PSNCoordinator(hass, config_entry)
     with patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client):
@@ -39,18 +36,18 @@ async def test_update_filters_empty_duid(
 ) -> None:
     config_entry.add_to_hass(hass)
     coordinator = PSNCoordinator(hass, config_entry)
-    mock_can_client.get_clients = AsyncMock(return_value=[
-        {"duid": DUID_1, "name": "Good", "platform": "PS5", "status": "online"},
-        {"duid": "", "name": "Bad", "platform": "PS5", "status": "online"},
-    ])
+    mock_can_client.get_clients = AsyncMock(
+        return_value=[
+            {"duid": DUID_1, "name": "Good", "platform": "PS5", "status": "online"},
+            {"duid": "", "name": "Bad", "platform": "PS5", "status": "online"},
+        ]
+    )
     with patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client):
         await coordinator.async_refresh()
     assert len(coordinator.data.clients) == 1
 
 
-async def test_token_refresh_when_expired(
-    hass: HomeAssistant, mock_can_client
-) -> None:
+async def test_token_refresh_when_expired(hass: HomeAssistant, mock_can_client) -> None:
     expired_entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=ACCOUNT_ID,
@@ -62,17 +59,17 @@ async def test_token_refresh_when_expired(
     )
     expired_entry.add_to_hass(hass)
     coordinator = PSNCoordinator(hass, expired_entry)
-    with patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls, \
-         patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client):
+    with (
+        patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls,
+        patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client),
+    ):
         mock_auth = mock_auth_cls.return_value
         mock_auth.refresh_access_token = AsyncMock(return_value=FAKE_TOKENS)
         await coordinator.async_refresh()
     mock_auth.refresh_access_token.assert_awaited_once_with(REFRESH_TOKEN)
 
 
-async def test_token_refresh_updates_entry(
-    hass: HomeAssistant, mock_can_client
-) -> None:
+async def test_token_refresh_updates_entry(hass: HomeAssistant, mock_can_client) -> None:
     new_access = "new_access_token_xyz"
     new_refresh = "new_refresh_token_xyz"
     expired_entry = MockConfigEntry(
@@ -91,8 +88,10 @@ async def test_token_refresh_updates_entry(
         "refresh_token": new_refresh,
         "expires_at": time.time() + 3600,
     }
-    with patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls, \
-         patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client):
+    with (
+        patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls,
+        patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client),
+    ):
         mock_auth = mock_auth_cls.return_value
         mock_auth.refresh_access_token = AsyncMock(return_value=new_tokens)
         await coordinator.async_refresh()
@@ -100,9 +99,7 @@ async def test_token_refresh_updates_entry(
     assert expired_entry.data[CONF_REFRESH_TOKEN] == new_refresh
 
 
-async def test_token_refresh_no_write_when_unchanged(
-    hass: HomeAssistant, mock_can_client
-) -> None:
+async def test_token_refresh_no_write_when_unchanged(hass: HomeAssistant, mock_can_client) -> None:
     expired_entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=ACCOUNT_ID,
@@ -119,9 +116,11 @@ async def test_token_refresh_no_write_when_unchanged(
         "refresh_token": REFRESH_TOKEN,
         "expires_at": time.time() + 3600,
     }
-    with patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls, \
-         patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client), \
-         patch.object(hass.config_entries, "async_update_entry") as mock_update:
+    with (
+        patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls,
+        patch("custom_components.psn.coordinator.CANClient", return_value=mock_can_client),
+        patch.object(hass.config_entries, "async_update_entry") as mock_update,
+    ):
         mock_auth = mock_auth_cls.return_value
         mock_auth.refresh_access_token = AsyncMock(return_value=same_tokens)
         await coordinator.async_refresh()
@@ -168,9 +167,7 @@ async def test_network_error_during_refresh_raises_update_failed(
     coordinator = PSNCoordinator(hass, expired_entry)
     with patch("custom_components.psn.coordinator.PSNAuth") as mock_auth_cls:
         mock_auth = mock_auth_cls.return_value
-        mock_auth.refresh_access_token = AsyncMock(
-            side_effect=OSError("network unreachable")
-        )
+        mock_auth.refresh_access_token = AsyncMock(side_effect=OSError("network unreachable"))
         await coordinator.async_refresh()
     assert coordinator.last_update_success is False
 

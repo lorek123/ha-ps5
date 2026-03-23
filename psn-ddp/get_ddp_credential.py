@@ -50,6 +50,7 @@ _UA = "com.sony.snei.np.android.sso.share.oauth.versa.USER_AGENT"
 
 # ---- PKCE helpers ----------------------------------------------------------
 
+
 def _make_verifier() -> str:
     return base64.urlsafe_b64encode(os.urandom(32)).rstrip(b"=").decode()
 
@@ -61,21 +62,25 @@ def _make_challenge(verifier: str) -> str:
 
 # ---- OAuth steps -----------------------------------------------------------
 
+
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """Prevent urllib from following any redirect."""
+
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         return None  # don't follow
 
 
 def _get_auth_code(npsso: str) -> str:
     """Exchange npsso cookie for an OAuth authorization code."""
-    params = urllib.parse.urlencode({
-        "access_type": "offline",
-        "client_id": _CLIENT_ID,
-        "redirect_uri": _REDIRECT_URI,
-        "response_type": "code",
-        "scope": _SCOPE,
-    })
+    params = urllib.parse.urlencode(
+        {
+            "access_type": "offline",
+            "client_id": _CLIENT_ID,
+            "redirect_uri": _REDIRECT_URI,
+            "response_type": "code",
+            "scope": _SCOPE,
+        }
+    )
     req = urllib.request.Request(
         f"{_AUTH_URL}?{params}",
         headers={"Cookie": f"npsso={npsso}", "User-Agent": _UA},
@@ -97,13 +102,15 @@ def _get_auth_code(npsso: str) -> str:
 
 def _get_access_token(code: str, verifier: str) -> str:
     """Exchange authorization code + PKCE verifier for an access token."""
-    body = urllib.parse.urlencode({
-        "code": code,
-        "code_verifier": verifier,
-        "grant_type": "authorization_code",
-        "redirect_uri": _REDIRECT_URI,
-        "token_format": "jwt",
-    }).encode()
+    body = urllib.parse.urlencode(
+        {
+            "code": code,
+            "code_verifier": verifier,
+            "grant_type": "authorization_code",
+            "redirect_uri": _REDIRECT_URI,
+            "token_format": "jwt",
+        }
+    ).encode()
     req = urllib.request.Request(
         _TOKEN_URL,
         data=body,

@@ -23,15 +23,14 @@ Public API::
 from __future__ import annotations
 
 import asyncio
+import socket
 
 from psn_ddp.const import DDP_SRCH_PORT
 from psn_ddp.protocol import (
     DDPStatus,
-    _DDPProtocol,
     _create_protocol,
     build_srch_packet,
     build_wakeup_packet,
-    parse_response,
 )
 
 __all__ = [
@@ -65,7 +64,9 @@ def _local_broadcast() -> str:
         return _BROADCAST
 
 
-async def async_get_status(host: str, timeout: float = _DEFAULT_TIMEOUT, src_port: int = DDP_SRCH_PORT) -> DDPStatus:
+async def async_get_status(
+    host: str, timeout: float = _DEFAULT_TIMEOUT, src_port: int = DDP_SRCH_PORT
+) -> DDPStatus:
     """Poll a single console's DDP status.
 
     Sends a SRCH packet directly to *host* and waits up to *timeout* seconds
@@ -89,7 +90,7 @@ async def async_get_status(host: str, timeout: float = _DEFAULT_TIMEOUT, src_por
         protocol.send(build_srch_packet(), host)
         try:
             await asyncio.wait_for(protocol.received.wait(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             pass
     finally:
         transport.close()

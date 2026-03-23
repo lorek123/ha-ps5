@@ -1,4 +1,5 @@
 """PSN media_player entities — one per PS5 console in the CAN client list."""
+
 from __future__ import annotations
 
 import logging
@@ -18,10 +19,10 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from pyps5.can import PLATFORM_PS5, CANClient, CANError
 
 from .const import CONF_ACCESS_TOKEN, DOMAIN
 from .coordinator import PSNClient, PSNCoordinator
-from pyps5.can import CANClient, CANError, PLATFORM_PS5
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -50,10 +51,7 @@ async def async_setup_entry(
         new_duids = set(coordinator.data.clients) - known_duids
         if new_duids:
             known_duids.update(new_duids)
-            async_add_entities([
-                PSNMediaPlayer(coordinator, entry, duid)
-                for duid in new_duids
-            ])
+            async_add_entities([PSNMediaPlayer(coordinator, entry, duid) for duid in new_duids])
 
         # Remove device registry entries for consoles no longer on the account
         current_duids = set(coordinator.data.clients)
@@ -134,8 +132,6 @@ class PSNMediaPlayer(CoordinatorEntity[PSNCoordinator], MediaPlayerEntity):
     async def async_turn_off(self) -> None:
         await self._can(lambda can, duid: can.enter_rest_mode(duid))
 
-    async def async_play_media(
-        self, media_type: str, media_id: str, **kwargs: Any
-    ) -> None:
+    async def async_play_media(self, media_type: str, media_id: str, **kwargs: Any) -> None:
         """Launch a title by title ID (media_id)."""
         await self._can(lambda can, duid: can.launch_title(duid, media_id))

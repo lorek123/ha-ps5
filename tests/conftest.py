@@ -1,4 +1,5 @@
 """Root conftest — activates pytest-homeassistant-custom-component."""
+
 import pytest
 
 pytest_plugins = "pytest_homeassistant_custom_component"

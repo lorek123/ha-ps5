@@ -1,16 +1,15 @@
 """Tests for PS5 registration helpers (pure functions — no network needed)."""
+
 from __future__ import annotations
 
-import asyncio
-import struct
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from custom_components.ps5.regist import (
     RegistrationError,
-    _aes_cfb128,
     _aeropause,
+    _aes_cfb128,
     _build_payload,
     _derive_bright,
     _generate_iv,
@@ -19,8 +18,8 @@ from custom_components.ps5.regist import (
     async_register,
 )
 
-
 # ── pure crypto helpers ──────────────────────────────────────────────────────
+
 
 def test_derive_bright_returns_16_bytes() -> None:
     result = _derive_bright(b"\x00" * 16, key_0_off=0, pin=12345678)
@@ -36,7 +35,7 @@ def test_derive_bright_xors_pin() -> None:
 
 
 def test_aeropause_returns_16_bytes() -> None:
-    result = _aeropause(b"\xAB" * 16, key_1_off=0)
+    result = _aeropause(b"\xab" * 16, key_1_off=0)
     assert len(result) == 16
 
 
@@ -103,6 +102,7 @@ def test_udp_search_with_response() -> None:
 
 # ── _parse_response ──────────────────────────────────────────────────────────
 
+
 def test_parse_response_no_header_raises() -> None:
     with pytest.raises(RegistrationError, match="No HTTP header"):
         _parse_response(b"garbage data without double crlf")
@@ -118,21 +118,22 @@ def test_parse_response_ok() -> None:
 
 def test_parse_response_non_200_status() -> None:
     raw = b"HTTP/1.1 500 Error\r\n\r\n"
-    status, headers, body = _parse_response(raw)
+    status, _headers, _body = _parse_response(raw)
     assert status == 500
 
 
 # ── async_register (mocked TCP) ──────────────────────────────────────────────
 
+
 async def test_async_register_success() -> None:
     """Test happy path by mocking both network and AES decryption."""
     # The regist key is a hex-encoded ASCII hex value; _regist_key_to_credential decodes it.
-    # Use a simple 8-byte hex key: hex("deadbeef") → "6465616462656566" → int(0xdeadbeef) → credential
+    # hex("deadbeef") -> "6465616462656566" -> int(0xdeadbeef) -> credential
     regist_key_hex = bytes("deadbeef", "ascii").hex()  # "6465616462656566"
     expected_credential = str(int("deadbeef", 16))  # "3735928559"
 
     # Mock response: 200 OK with any body (crypto is mocked away)
-    response = b"HTTP/1.1 200 OK\r\nContent-Length: 32\r\n\r\n" + b"\xAB" * 32
+    response = b"HTTP/1.1 200 OK\r\nContent-Length: 32\r\n\r\n" + b"\xab" * 32
 
     mock_reader = AsyncMock()
     mock_writer = MagicMock()
@@ -144,17 +145,22 @@ async def test_async_register_success() -> None:
     # Patch the AES decryption to return plaintext containing PS5-RegistKey
     decrypted = f"PS5-RegistKey: {regist_key_hex}\r\n".encode()
 
-    with patch("custom_components.ps5.regist.asyncio.open_connection",
-               return_value=(mock_reader, mock_writer)), \
-         patch("custom_components.ps5.regist._aes_cfb128", return_value=decrypted):
+    with (
+        patch(
+            "custom_components.ps5.regist.asyncio.open_connection",
+            return_value=(mock_reader, mock_writer),
+        ),
+        patch("custom_components.ps5.regist._aes_cfb128", return_value=decrypted),
+    ):
         result = await async_register("192.168.1.100", pin=12345678, account_id_str="123456789")
 
     assert result == expected_credential
 
 
 async def test_async_register_connection_error() -> None:
-    with patch("custom_components.ps5.regist.asyncio.open_connection",
-               side_effect=OSError("refused")):
+    with patch(
+        "custom_components.ps5.regist.asyncio.open_connection", side_effect=OSError("refused")
+    ):
         with pytest.raises(RegistrationError):
             await async_register("192.168.1.100", pin=12345678, account_id_str="123456789")
 
@@ -166,17 +172,19 @@ async def test_async_register_timeout() -> None:
     mock_writer.drain = AsyncMock()
     mock_writer.close = MagicMock()
     mock_writer.wait_closed = AsyncMock()
-    mock_reader.read = AsyncMock(side_effect=asyncio.TimeoutError())
+    mock_reader.read = AsyncMock(side_effect=TimeoutError())
 
-    with patch("custom_components.ps5.regist.asyncio.open_connection",
-               return_value=(mock_reader, mock_writer)):
+    with patch(
+        "custom_components.ps5.regist.asyncio.open_connection",
+        return_value=(mock_reader, mock_writer),
+    ):
         with pytest.raises(RegistrationError, match="No response"):
             await async_register("192.168.1.100", pin=12345678, account_id_str="123456789")
 
 
 async def test_async_register_missing_regist_key() -> None:
     """Decrypted body has no PS5-RegistKey header → RegistrationError."""
-    response = b"HTTP/1.1 200 OK\r\nContent-Length: 32\r\n\r\n" + b"\xAB" * 32
+    response = b"HTTP/1.1 200 OK\r\nContent-Length: 32\r\n\r\n" + b"\xab" * 32
     mock_reader = AsyncMock()
     mock_writer = MagicMock()
     mock_writer.drain = AsyncMock()
@@ -184,9 +192,13 @@ async def test_async_register_missing_regist_key() -> None:
     mock_writer.wait_closed = AsyncMock()
     mock_reader.read = AsyncMock(return_value=response)
 
-    with patch("custom_components.ps5.regist.asyncio.open_connection",
-               return_value=(mock_reader, mock_writer)), \
-         patch("custom_components.ps5.regist._aes_cfb128", return_value=b"SomeHeader: value\r\n"):
+    with (
+        patch(
+            "custom_components.ps5.regist.asyncio.open_connection",
+            return_value=(mock_reader, mock_writer),
+        ),
+        patch("custom_components.ps5.regist._aes_cfb128", return_value=b"SomeHeader: value\r\n"),
+    ):
         with pytest.raises(RegistrationError, match="PS5-RegistKey missing"):
             await async_register("192.168.1.100", pin=12345678, account_id_str="123456789")
 
@@ -200,7 +212,9 @@ async def test_async_register_bad_challenge_response() -> None:
     # Return a non-200 response to the challenge
     mock_reader.read = AsyncMock(return_value=b"HTTP/1.1 401 Unauthorized\r\n\r\n")
 
-    with patch("custom_components.ps5.regist.asyncio.open_connection",
-               return_value=(mock_reader, mock_writer)):
+    with patch(
+        "custom_components.ps5.regist.asyncio.open_connection",
+        return_value=(mock_reader, mock_writer),
+    ):
         with pytest.raises(RegistrationError):
             await async_register("192.168.1.100", pin=12345678, account_id_str="123456789")

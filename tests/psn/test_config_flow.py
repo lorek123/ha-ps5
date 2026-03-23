@@ -1,34 +1,35 @@
 """Tests for PSN config flow."""
+
 from __future__ import annotations
 
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import aiohttp
-import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.psn.const import CONF_ACCESS_TOKEN, CONF_REFRESH_TOKEN, DOMAIN
 
-from .conftest import ACCOUNT_ID, ACCESS_TOKEN, FAKE_TOKENS, REFRESH_TOKEN
+from .conftest import ACCESS_TOKEN, ACCOUNT_ID, FAKE_TOKENS, REFRESH_TOKEN
 
 
 async def test_user_step_shows_form(hass: HomeAssistant) -> None:
-    result = await hass.config_entries.flow.async_init(
-        DOMAIN, context={"source": "user"}
-    )
+    result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
     assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
 
 
 async def test_success(hass: HomeAssistant) -> None:
-    with patch(
-        "custom_components.psn.config_flow.PSNAuth.from_npsso",
-        return_value=FAKE_TOKENS,
-    ), patch(
-        "custom_components.psn.config_flow.account_id_from_access_token",
-        return_value=ACCOUNT_ID,
+    with (
+        patch(
+            "custom_components.psn.config_flow.PSNAuth.from_npsso",
+            return_value=FAKE_TOKENS,
+        ),
+        patch(
+            "custom_components.psn.config_flow.account_id_from_access_token",
+            return_value=ACCOUNT_ID,
+        ),
     ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"npsso": "mynpsso"}
@@ -73,12 +74,15 @@ async def test_unknown_error(hass: HomeAssistant) -> None:
 
 async def test_already_configured(hass: HomeAssistant, config_entry) -> None:
     config_entry.add_to_hass(hass)
-    with patch(
-        "custom_components.psn.config_flow.PSNAuth.from_npsso",
-        return_value=FAKE_TOKENS,
-    ), patch(
-        "custom_components.psn.config_flow.account_id_from_access_token",
-        return_value=ACCOUNT_ID,
+    with (
+        patch(
+            "custom_components.psn.config_flow.PSNAuth.from_npsso",
+            return_value=FAKE_TOKENS,
+        ),
+        patch(
+            "custom_components.psn.config_flow.account_id_from_access_token",
+            return_value=ACCOUNT_ID,
+        ),
     ):
         result = await hass.config_entries.flow.async_init(
             DOMAIN, context={"source": "user"}, data={"npsso": "mynpsso"}
@@ -94,9 +98,7 @@ async def test_reauth_invalid_npsso(hass: HomeAssistant, config_entry) -> None:
         "custom_components.psn.config_flow.PSNAuth.from_npsso",
         side_effect=ValueError("bad"),
     ):
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], {"npsso": "bad"}
-        )
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {"npsso": "bad"})
     assert result["errors"]["base"] == "invalid_npsso"
 
 
@@ -146,9 +148,7 @@ async def test_reconfigure_invalid_npsso(hass: HomeAssistant, config_entry) -> N
         "custom_components.psn.config_flow.PSNAuth.from_npsso",
         side_effect=ValueError("bad npsso"),
     ):
-        result = await hass.config_entries.flow.async_configure(
-            result["flow_id"], {"npsso": "bad"}
-        )
+        result = await hass.config_entries.flow.async_configure(result["flow_id"], {"npsso": "bad"})
     assert result["errors"]["base"] == "invalid_npsso"
 
 
