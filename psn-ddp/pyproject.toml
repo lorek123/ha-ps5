@@ -12,7 +12,7 @@ requires-python = ">=3.12"
 dependencies = []  # stdlib only: asyncio, socket, logging, dataclasses
 
 [project.urls]
-Homepage = "https://github.com/lorek/ha-ps5"
+Homepage = "https://github.com/lorek123/ha-ps5"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/psn_ddp"]

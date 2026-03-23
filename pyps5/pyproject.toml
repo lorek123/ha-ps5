@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/lorek/pyps5"
+Homepage = "https://github.com/lorek123/ha-ps5/tree/main/pyps5"
 
 [tool.hatch.build.targets.wheel]
 packages = ["pyps5"]

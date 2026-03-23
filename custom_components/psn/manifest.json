@@ -1,9 +1,9 @@
 {
   "domain": "psn",
   "name": "PlayStation Network",
-  "codeowners": ["@lorek"],
+  "codeowners": ["@lorek123"],
   "config_flow": true,
-  "documentation": "https://github.com/lorek/ha-ps5",
+  "documentation": "https://github.com/lorek123/ha-ps5",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "requirements": ["pyps5==0.1.0"],

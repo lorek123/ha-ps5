@@ -1,9 +1,9 @@
 {
   "domain": "ps5",
   "name": "PlayStation 5",
-  "codeowners": ["@lorek"],
+  "codeowners": ["@lorek123"],
   "config_flow": true,
-  "documentation": "https://github.com/lorek/ha-ps5",
+  "documentation": "https://github.com/lorek123/ha-ps5",
   "integration_type": "device",
   "iot_class": "local_polling",
   "requirements": ["psn-ddp==0.1.0"],
