@@ -1,0 +1,9 @@
+{
+  "entity": {
+    "media_player": {
+      "_": {
+        "default": "mdi:sony-playstation"
+      }
+    }
+  }
+}

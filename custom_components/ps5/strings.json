@@ -1,0 +1,47 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Find your PlayStation 5",
+        "description": "Leave the IP field blank to auto-discover your PS5 on the local network, or enter its IP address directly.\n\n{discover_hint}",
+        "data": {
+          "host": "IP Address (optional)"
+        }
+      },
+      "pick_device": {
+        "title": "Select PlayStation 5",
+        "description": "Multiple PS5 consoles were found. Select the one you want to add.",
+        "data": {
+          "host": "Console"
+        }
+      },
+      "pin": {
+        "title": "Register with your PS5",
+        "description": "**Console:** {host}\n\n{pin_hint}\n\n{npsso_hint}",
+        "data": {
+          "pin": "8-Digit PIN",
+          "npsso": "NPSSO Token"
+        }
+      },
+      "reconfigure": {
+        "title": "Update PS5 IP Address",
+        "description": "Enter the new IP address of your PlayStation 5.",
+        "data": {
+          "host": "IP Address"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Cannot reach the PS5 at that IP address.",
+      "no_devices_found": "No PS5 consoles found on the network.",
+      "invalid_pin": "The PIN must be exactly 8 digits.",
+      "invalid_npsso": "Invalid or expired NPSSO token.",
+      "registration_failed": "Registration failed. Make sure you entered the PIN within 60 seconds and that your PS5 is in Link Device mode.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This PS5 is already configured.",
+      "reconfigure_successful": "IP address updated successfully."
+    }
+  }
+}

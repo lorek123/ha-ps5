@@ -1,0 +1,5 @@
+{
+  "name": "PlayStation 5 + PSN",
+  "domains": ["ps5", "psn"],
+  "render_readme": true
+}

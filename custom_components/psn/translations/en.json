@@ -1,0 +1,37 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to PlayStation Network",
+        "description": "Enter your NPSSO token to authenticate with PSN.\n\n{npsso_hint}",
+        "data": {
+          "npsso": "NPSSO Token"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Re-authenticate with PlayStation Network",
+        "description": "Your PSN session has expired. Enter a fresh NPSSO token.\n\n{npsso_hint}",
+        "data": {
+          "npsso": "NPSSO Token"
+        }
+      },
+      "reconfigure": {
+        "title": "Update PSN Credentials",
+        "description": "Enter a fresh NPSSO token to update your credentials.\n\n{npsso_hint}",
+        "data": {
+          "npsso": "NPSSO Token"
+        }
+      }
+    },
+    "error": {
+      "invalid_npsso": "Invalid or expired NPSSO token. Please get a fresh one from the URL above.",
+      "cannot_connect": "Could not connect to PlayStation Network servers.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This PSN account is already configured.",
+      "reauth_successful": "Re-authentication successful.",
+      "reconfigure_successful": "Credentials updated successfully."
+    }
+  }
+}

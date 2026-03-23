@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+
+# Test / coverage
+.coverage
+.pytest_cache/
+.mypy_cache/
+htmlcov/
+
+# HA dev artifacts
+*.db
+home-assistant.log
+
+# Reverse-engineering workspace (not part of the integration)
+*.apk
+*.hasm
+*.hasm.gz
+bundle_decompiled.js
+chiaki-ng/
+ghidra/
+deflat/
+decompiled/
+decompiled-remoteplay/
+psnawp/
+find_register_natives.py
+test_can_power.py
+
+# uv
+uv.lock
+psn-ddp/uv.lock
+pyps5/uv.lock
