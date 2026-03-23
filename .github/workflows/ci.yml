@@ -23,7 +23,7 @@ jobs:
         run: uv sync --all-groups
 
       - name: Lint actions (actionlint)
-        uses: rhysd/actionlint@v1
+        uses: rhysd/actionlint@v1.7.11
 
       - name: Lint (ruff)
         run: uv run ruff check . && uv run ruff format --check .

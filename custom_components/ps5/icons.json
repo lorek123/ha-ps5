@@ -1,9 +1,7 @@
 {
-  "entity": {
-    "media_player": {
-      "_": {
-        "default": "mdi:sony-playstation"
-      }
+  "entity_component": {
+    "_": {
+      "default": "mdi:sony-playstation"
     }
   }
 }
