@@ -122,6 +122,23 @@ def test_parse_response_non_200_status() -> None:
     assert status == 500
 
 
+def test_parse_response_malformed_status_line() -> None:
+    """HTTP/ line that doesn't match the status regex → status stays 0."""
+    raw = b"HTTP/bad\r\nRP-Nonce: X\r\n\r\n"
+    status, headers, _body = _parse_response(raw)
+    assert status == 0
+    assert headers["RP-Nonce"] == "X"
+
+
+def test_parse_response_header_line_without_colon() -> None:
+    """A header line with no ': ' and not starting HTTP/ is silently skipped."""
+    raw = b"HTTP/1.1 200 OK\r\nX-Junk-No-Colon\r\nRP-Nonce: Y\r\n\r\n"
+    status, headers, _body = _parse_response(raw)
+    assert status == 200
+    assert "X-Junk-No-Colon" not in headers
+    assert headers["RP-Nonce"] == "Y"
+
+
 # ── async_register (mocked TCP) ──────────────────────────────────────────────
 
 
@@ -143,7 +160,8 @@ async def test_async_register_success() -> None:
     mock_reader.read = AsyncMock(return_value=response)
 
     # Patch the AES decryption to return plaintext containing PS5-RegistKey
-    decrypted = f"PS5-RegistKey: {regist_key_hex}\r\n".encode()
+    # Include a blank line to cover the `if ": " in line` False branch
+    decrypted = f"PS5-RegistKey: {regist_key_hex}\r\nno-colon-here\r\n".encode()
 
     with (
         patch(
