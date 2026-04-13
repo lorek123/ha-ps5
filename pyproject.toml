@@ -18,7 +18,7 @@ dev = [
     "pytest-homeassistant-custom-component==0.13.319",
     "psn-ddp",
     "pyps5",
-    "cryptography>=41.0",
+    "cryptography>=46.0.7",
     "mypy>=1.19.1",
     "ruff>=0.15.7",
     "pip-audit>=2.10.0",
